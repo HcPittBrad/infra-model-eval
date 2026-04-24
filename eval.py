@@ -45,10 +45,12 @@ def get_client(model_cfg: dict) -> OpenAI | None:
 def run_one(client: OpenAI, model_id: str, system: str, user: str,
             max_tokens: int, is_reasoning: bool) -> dict:
     effective_max = max_tokens * 6 if is_reasoning else max_tokens
+    # o1/o3/o4 系列用 max_completion_tokens，其余用 max_tokens
+    token_param = "max_completion_tokens" if is_reasoning else "max_tokens"
     t0 = time.time()
     r = client.chat.completions.create(
         model=model_id,
-        max_tokens=effective_max,
+        **{token_param: effective_max},
         messages=[
             {"role": "system", "content": system},
             {"role": "user",   "content": user},
